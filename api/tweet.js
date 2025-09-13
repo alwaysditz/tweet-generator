@@ -12,8 +12,12 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Menggunakan URL API yang baru
-    const apiUrl = `https://api.siputzx.my.id/api/m/tweet?profile=${encodeURIComponent(profile || '')}&name=${encodeURIComponent(name)}&username=${encodeURIComponent(username)}&tweet=${encodeURIComponent(tweet)}&image=null&theme=dark&retweets=${retweets}&quotes=400&likes=${likes}&client=Twitter%20for%20iPhone`;
+    // Tentukan URL profil default jika field 'profile' kosong
+    const defaultProfileUrl = 'https://files.catbox.moe/f7g0nx.jpg'; 
+    const finalProfileUrl = profile ? profile : defaultProfileUrl;
+
+    // Bangun URL API eksternal dengan URL profil yang sudah ditentukan
+    const apiUrl = `https://api.siputzx.my.id/api/m/tweet?profile=${encodeURIComponent(finalProfileUrl)}&name=${encodeURIComponent(name)}&username=${encodeURIComponent(username)}&tweet=${encodeURIComponent(tweet)}&image=null&theme=dark&retweets=${retweets}&quotes=400&likes=${likes}&client=Twitter%20for%20iPhone`;
 
     const response = await fetch(apiUrl);
 
