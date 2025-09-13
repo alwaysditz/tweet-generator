@@ -1,0 +1,11 @@
+{
+  "name": "tweet-generator",
+  "version": "1.0.0",
+  "description": "A simple tweet generator website hosted on Vercel.",
+  "main": "api/tweet.js",
+  "scripts": {
+    "start": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "private": true
+}
