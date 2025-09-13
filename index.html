@@ -258,12 +258,11 @@
         const url = URL.createObjectURL(blob);
         result.innerHTML = `
           <img src="${url}" alt="hasil"/>
-          <a class="download" href="${url}" download="tweet.png">Download</a>
+          <a class="download" href="${url}" download="tweet_${Date.now()}.png">Download</a>
         `;
         result.querySelector(".download").onclick = () => setTimeout(() => location.reload(), 800);
       } catch (err) { showError("Error jaringan: " + err.message); }
     }
   </script>
 </body>
-  </html>
-            
+</html>
