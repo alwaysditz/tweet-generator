@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tweet Generator — Neon</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --bg-dark: #0A0A0E;
+      --panel-bg: rgba(25, 25, 30, 0.6);
+      --border-color: rgba(100, 100, 150, 0.2);
+      --accent-color: #A0B5FF;
+      --neon-glow: rgba(160, 181, 255, 0.4);
+      --muted-text: rgba(255, 255, 255, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0 }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: var(--bg-dark);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .wrap { width: 100%; max-width: 500px; z-index: 1; }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 40px; 
+      font-weight: 700;
+      color: var(--accent-color);
+      text-shadow: 0 0 10px var(--neon-glow);
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .note {
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted-text);
+      margin-bottom: 20px;
+    }
+
+    .field { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted-text);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 400;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      background: transparent;
+      color: #fff;
+      transition: all .3s ease;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 16px var(--neon-glow);
+      outline: none;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: var(--muted-text); }
+
+    .row { display: flex; gap: 16px; }
+    .row .field { flex: 1; }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7A9BFF, #A0B5FF);
+      color: var(--bg-dark);
+      font-size: 16px;
+      transition: transform .2s ease, box-shadow .2s ease;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .btn:active { transform: translateY(1px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); }
+    .btn.secondary {
+      background: transparent;
+      color: var(--accent-color);
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+    .btn.secondary:active { transform: translateY(1px); }
+
+    .result { text-align: center; margin-top: 24px; }
+    .result img {
+      max-width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+    .download {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--bg-dark);
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform .2s ease;
+    }
+    .download:hover { transform: translateY(-2px); }
+
+    .loading {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top-color: var(--accent-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: #fff;
+      opacity: .8;
+      animation: twinkle linear infinite;
+    }
+    @keyframes twinkle {
+      0% { opacity: .2; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(8px); }
+      100% { opacity: .2; transform: translateY(0); }
+    }
+
+    footer { text-align: center; font-size: 12px; color: var(--muted-text); margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <div class="wrap">
+    <header>Tweet Generator</header>
+
+    <div class="panel">
+      <p class="note">Isi form lalu klik <strong>Generate</strong>. Setelah download, halaman otomatis reset.</p>
+
+      <form id="form">
+        <div class="field">
+          <label for="profile">Foto profil (opsional)</label>
+          <input id="profile" type="text" placeholder="URL gambar profil">
+        </div>
+        <div class="field">
+          <label for="name">Nama tampilan</label>
+          <input id="name" type="text" placeholder="Contoh: Ditzz" required>
+        </div>
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" type="text" placeholder="Contoh: Always.ditz (tanpa @)" required>
+        </div>
+        <div class="field">
+          <label for="tweet">Isi tweet</label>
+          <textarea id="tweet" placeholder="Masukkan kata-katamu" required></textarea>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="retweets">Retweets</label>
+            <input id="retweets" type="number" value="1000" min="0">
+          </div>
+          <div class="field">
+            <label for="likes">Likes</label>
+            <input id="likes" type="number" value="5000" min="0">
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px">
+          <button class="btn" type="submit">Generate</button>
+          <button class="btn secondary" type="button" id="resetBtn">Reset</button>
+        </div>
+      </form>
+
+      <div id="result" class="result"></div>
+    </div>
+
+    <footer>© Ditzz</footer>
+  </div>
+
+  <script>
+    // stars
+    const starContainer = document.getElementById("stars");
+    for (let i = 0; i < 35; i++) {
+      const s = document.createElement("div");
+      s.className = "star";
+      s.style.left = Math.random() * 100 + "vw";
+      s.style.top = Math.random() * 100 + "vh";
+      s.style.animationDuration = (3 + Math.random() * 4) + "s";
+      starContainer.appendChild(s);
+    }
+
+    const form = document.getElementById("form");
+    const result = document.getElementById("result");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const showLoading = () => result.innerHTML = '<div class="loading"></div>';
+    const showError = msg => result.innerHTML = `<div style="color:#ff6b6b; font-size: 14px;">${msg}</div>`;
+
+    resetBtn.onclick = () => { form.reset(); result.innerHTML = ""; };
+
+    form.onsubmit = async e => {
+      e.preventDefault();
+      const profile = document.getElementById("profile").value.trim();
+      const name = document.getElementById("name").value.trim();
+      let username = document.getElementById("username").value.trim();
+      const tweet = document.getElementById("tweet").value.trim();
+      const retweets = document.getElementById("retweets").value;
+      const likes = document.getElementById("likes").value;
+
+      if (!name || !username || !tweet) { showError("Harap isi semua kolom"); return; }
+      if (username.startsWith("@")) username = username.slice(1);
+
+      showLoading();
+      try {
+        // Mengubah URL fetch ke endpoint Vercel lokal
+        const res = await fetch("/api/tweet", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            profile: profile || null, name, username, tweet,
+            retweets: Number(retweets), likes: Number(likes),
+          })
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            showError("Gagal generate: " + errorData.error);
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        result.innerHTML = `
+          <img src="${url}" alt="hasil"/>
+          <a class="download" href="${url}" download="tweet.png">Download</a>
+        `;
+        result.querySelector(".download").onclick = () => setTimeout(() => location.reload(), 800);
+      } catch (err) { showError("Error jaringan: " + err.message); }
+    }
+  </script>
+</body>
+  </html>
+            
